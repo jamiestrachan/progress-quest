@@ -15,7 +15,8 @@ module.exports = function (grunt) {
         copy: {
           deploy: {
             files: [
-              { src: "src/css/**", dest: "deploy/css" }
+              { src: "src/css/**", dest: "deploy/css" },
+              { src: "src/img/**", dest: "deploy/img" }
             ]
           }
         },
