@@ -7,4 +7,5 @@ obj/*
 *.sln
 *.suo
 .idea/*
+.sass-cache/*
 deploy/*
