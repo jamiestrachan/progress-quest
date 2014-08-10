@@ -1,0 +1,3 @@
+pq.Hero = function () {
+	
+};

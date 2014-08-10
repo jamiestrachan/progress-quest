@@ -1,0 +1,3 @@
+pq.Class = function () {
+	
+};
