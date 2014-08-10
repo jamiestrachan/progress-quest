@@ -49,11 +49,11 @@ module.exports = function (grunt) {
         },
         watch: {
             files: 'src/**/*.*',
-            tasks: ['jshint', 'copy', 'concat']
+            tasks: ['jshint', 'copy', 'concat', 'sass']
         }
     });
 
     grunt.registerTask('default', ['jshint', 'copy', 'concat', 'sass']);
-    grunt.registerTask('watch', ['jshint', 'copy', 'concat', 'sass', 'connect', 'open', 'watch']);
+    grunt.registerTask('develop', ['jshint', 'copy', 'concat', 'sass', 'connect', 'open', 'watch']);
 
 }
