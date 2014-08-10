@@ -11,7 +11,8 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         jshint: {
-            src: [ "src/js/**/*.js" ]
+            beforeconcat: [ "src/js/**/*.js" ],
+            afterconcat: [ "deploy/js/**/*.js" ]
         },
         copy: {
           deploy: {
@@ -23,7 +24,7 @@ module.exports = function (grunt) {
         },
         concat: {
             deploy: {
-                src: "src/js/**/*.js",
+                src: [ "src/js/init.js" ],
                 dest: 'deploy/js/<%= pkg.name %>.js'
             }
         },
@@ -53,7 +54,7 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask('default', ['jshint', 'copy', 'concat', 'sass']);
-    grunt.registerTask('develop', ['jshint', 'copy', 'concat', 'sass', 'connect', 'open', 'watch']);
+    grunt.registerTask('default', ['jshint:beforeconcat', 'copy', 'concat', 'jshint:afterconcat', 'sass']);
+    grunt.registerTask('develop', ['jshint:beforeconcat', 'copy', 'concat', 'jshint:afterconcat', 'sass', 'connect', 'open', 'watch']);
 
 }
