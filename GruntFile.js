@@ -2,6 +2,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-open');
@@ -15,8 +16,8 @@ module.exports = function (grunt) {
         copy: {
           deploy: {
             files: [
-              { src: "src/css/**", dest: "deploy/css" },
-              { src: "src/img/**", dest: "deploy/img" }
+              { expand: true, cwd: "src/", src: ["*"], dest: "deploy/", filter: "isFile" },
+              { expand: true, cwd: "src/img/", src: ["*"], dest: "deploy/img/" }
             ]
           }
         },
@@ -25,6 +26,13 @@ module.exports = function (grunt) {
                 src: "src/js/**/*.js",
                 dest: 'deploy/js/<%= pkg.name %>.js'
             }
+        },
+        sass: {
+          deploy: {
+            files: {
+              "deploy/css/<%= pkg.name %>.css": "src/scss/<%= pkg.name %>.scss"
+            }
+          }
         },
         connect: {
             server: {
@@ -45,7 +53,7 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask('default', ['jshint', 'copy', 'concat']);
-    grunt.registerTask('watch', ['jshint', 'copy', 'concat', 'connect', 'open', 'watch']);
+    grunt.registerTask('default', ['jshint', 'copy', 'concat', 'sass']);
+    grunt.registerTask('watch', ['jshint', 'copy', 'concat', 'sass', 'connect', 'open', 'watch']);
 
 }
