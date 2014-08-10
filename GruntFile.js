@@ -24,7 +24,7 @@ module.exports = function (grunt) {
         },
         concat: {
             deploy: {
-                src: [ "src/js/init.js" ],
+                src: [ "src/js/setup.js", "src/js/states.js" ],
                 dest: 'deploy/js/<%= pkg.name %>.js'
             }
         },
