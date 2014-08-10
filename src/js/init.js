@@ -1,0 +1,1 @@
+pq.sm = new pq.StateMachine(document.getElementById("canvas"), pq.states.menu);
