@@ -11,8 +11,15 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         jshint: {
-            beforeconcat: [ "src/js/**/*.js" ],
-            afterconcat: [ "deploy/js/**/*.js" ]
+            beforeconcat: [ "src/js/*.js" ],
+            afterconcat: {
+                options: {
+                    "eqnull": true
+                },
+                files: {
+                    src: [ "deploy/js/**/*.js" ]
+                }
+            }
         },
         copy: {
           deploy: {
@@ -24,7 +31,7 @@ module.exports = function (grunt) {
         },
         concat: {
             deploy: {
-                src: [ "src/js/setup.js", "src/js/states.js", "src/js/init.js" ],
+                src: [ "src/js/lib/mustache.js", "src/js/setup.js", "src/js/Hero.js", "src/js/Monster.js", "src/js/states.js", "src/js/init.js" ],
                 dest: 'deploy/js/<%= pkg.name %>.js'
             }
         },
