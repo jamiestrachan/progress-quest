@@ -1,4 +1,5 @@
-pq.hero = new pq.Hero();
+pq.gameState = {};
+pq.gameState.hero = new pq.Hero();
 
 pq.sm = new pq.StateMachine(document.getElementById("canvas"), pq.states.menu);
 
