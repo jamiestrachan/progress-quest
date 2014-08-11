@@ -6,7 +6,7 @@ pq.StateMachine = function (canvas, initState) {
 			var nextState = state.react(e.target.id);
 			if (nextState && pq.states[nextState.state]) {
 				if (nextState.preswitch) {
-					nextState.preswitch.apply(state);
+					nextState.preswitch(state, pq.states[nextState.state]);
 				}
 				update(pq.states[nextState.state]);
 			}
@@ -109,17 +109,17 @@ pq.states.startQuest = new pq.State(
 );
 pq.states.quest = new pq.State(
 	function (model) {
-		model.monster1 = new pq.Monster(pq.gameState.hero, "small");
-		model.monster2 = new pq.Monster(pq.gameState.hero, "medium");
-		model.monster3 = new pq.Monster(pq.gameState.hero, "large");
+		model.monster1 = new pq.Monster("small");
+		model.monster2 = new pq.Monster("medium");
+		model.monster3 = new pq.Monster("large");
 		return model;
 	},
 	'<h2>Continue Your Quest</h2><ol><li><p>{{monster1.name}} the level {{monster1.level}} {{monster1.type}} ({{monster1.hp}} HP)</p><p><button id="battle1">Battle!</button></p></li><li><p>{{monster2.name}} the level {{monster2.level}} {{monster2.type}} ({{monster2.hp}} HP)</p><p><button id="battle2">Battle!</button></p></li><li><p>{{monster3.name}} the level {{monster3.level}} {{monster3.type}} ({{monster3.hp}} HP)</p><p><button id="battle3">Battle!</button></p></li></ol>',
 	null,
 	{
-		"battle1": { "state": "battle", "preswitch": function () { pq.gameState.monster = this.model.monster1; } },
-		"battle2": { "state": "battle", "preswitch": function () { pq.gameState.monster = this.model.monster2; } },
-		"battle3": { "state": "battle", "preswitch": function () { pq.gameState.monster = this.model.monster3; } },
+		"battle1": { "state": "battle", "preswitch": function (thisState, nextState) { pq.gameState.monster = thisState.model.monster1; } },
+		"battle2": { "state": "battle", "preswitch": function (thisState, nextState) { pq.gameState.monster = thisState.model.monster2; } },
+		"battle3": { "state": "battle", "preswitch": function (thisState, nextState) { pq.gameState.monster = thisState.model.monster3; } }
 	}
 );
 pq.states.battle = new pq.State(
@@ -136,15 +136,20 @@ pq.states.battle = new pq.State(
 		var heroBar = document.getElementById("hero");
 		var heroAP = heroBar.value;
 		var victoryButton = document.getElementById("victory");
-		var damage, timer, start, then;
+		var damage, timer, then;
 
 		victoryButton.style.display = 'none';
 
+        function setDamage () {
+            damage = pq.utils.rnd(pq.gameState.hero.hitMin, (enemyHP >= pq.gameState.hero.hitMax) ? pq.gameState.hero.hitMax : enemyHP);
+            heroBar.max = damage;
+        }
+
 		function battle () {
-			if (!damage) {
-				damage = pq.utils.rnd(pq.gameState.hero.hitMin, pq.gameState.hero.hitMax);
-				heroBar.max = damage;
-			}
+            // charge
+            heroAP = heroAP + ((new Date().getTime() - then) / 1000);
+            heroBar.value = heroAP;
+            then = new Date().getTime();
 
 			if (heroAP >= damage) { // hit
 				enemyHP = enemyHP - damage;
@@ -152,26 +157,21 @@ pq.states.battle = new pq.State(
 				document.getElementById("currenthp").innerHTML = (enemyHP >= 0) ? enemyHP : 0;
 				heroAP = 0;
 				heroBar.value = heroAP;
-				damage = 0;
-
-				if (enemyHP <= 0) {
-					clearInterval(timer);
-					victoryButton.style.display = '';
-					console.log(((new Date().getTime() - start) / 1000) + " seconds");
-				} else {
-					then = new Date().getTime();
-				}
-			} else { // charge
-				heroAP = heroAP + ((new Date().getTime() - then) / 1000);
-				heroBar.value = heroAP;
-				then = new Date().getTime();
+                setDamage();
 			}
 
+            if (enemyHP <= 0) {
+                victoryButton.style.display = '';
+                console.timeEnd("battle");
+            } else {
+                timer = setTimeout(battle, ((damage - heroAP) < updateInterval) ? (damage - heroAP) : updateInterval);
+            }
 		}
 
-		start = new Date().getTime();
+		console.time("battle");
+        setDamage();
 		then = new Date().getTime();
-		timer = setInterval(battle, updateInterval);
+		timer = setTimeout(battle, updateInterval);
 	},
 	{
 		"victory": "result"
