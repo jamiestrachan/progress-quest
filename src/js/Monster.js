@@ -14,7 +14,7 @@ pq.Monster = function (size) {
 		level = pq.gameState.hero.level;
 	}
 
-	hp = level * 60;
+	hp = level * 30;
 
 	return {
 		name: name,

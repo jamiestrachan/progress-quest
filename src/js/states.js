@@ -136,25 +136,27 @@ pq.states.battle = new pq.State(
 		var heroBar = document.getElementById("hero");
 		var heroAP = heroBar.value;
 		var victoryButton = document.getElementById("victory");
-		var damage, timer, then;
+		var damage, timer, startCharge, startDamage;
 
 		victoryButton.style.display = 'none';
 
         function setDamage () {
             damage = pq.utils.rnd(pq.gameState.hero.hitMin, (enemyHP >= pq.gameState.hero.hitMax) ? pq.gameState.hero.hitMax : enemyHP);
             heroBar.max = damage;
+            startDamage = new Date().getTime();
         }
 
 		function battle () {
             // charge
-            heroAP = heroAP + ((new Date().getTime() - then) / 1000);
+            heroAP = heroAP + pq.utils.secondsSince(startCharge);
             heroBar.value = heroAP;
-            then = new Date().getTime();
+            startCharge = new Date().getTime();
 
 			if (heroAP >= damage) { // hit
-				enemyHP = enemyHP - damage;
-				enemyBar.value = enemyHP;
-				document.getElementById("currenthp").innerHTML = (enemyHP >= 0) ? enemyHP : 0;
+				enemyHP = enemyHP - pq.utils.secondsSince(startDamage);
+				enemyBar.value = Math.ceil(enemyHP);
+				document.getElementById("currenthp").innerHTML = (enemyHP >= 0) ? Math.ceil(enemyHP) : 0;
+				console.timeEnd("damage");
 				heroAP = 0;
 				heroBar.value = heroAP;
                 setDamage();
@@ -164,13 +166,13 @@ pq.states.battle = new pq.State(
                 victoryButton.style.display = '';
                 console.timeEnd("battle");
             } else {
-                timer = setTimeout(battle, ((damage - heroAP) < updateInterval) ? (damage - heroAP) : updateInterval);
+                timer = setTimeout(battle, (((damage - heroAP) * 1000) < updateInterval) ? (damage - heroAP) : updateInterval);
             }
 		}
 
 		console.time("battle");
         setDamage();
-		then = new Date().getTime();
+		startCharge = new Date().getTime();
 		timer = setTimeout(battle, updateInterval);
 	},
 	{
@@ -178,13 +180,20 @@ pq.states.battle = new pq.State(
 	}
 );
 pq.states.result = new pq.State(
-	null,
-	'<h2>Victory!</h2><p>Loot!</p><p><button id="battle1">Battle 1</button> <button id="battle2">Battle 2</button> <button id="battle3">Battle 3</button></p><p><button id="rest">Rest</button></p>',
+	function (model) {
+		model.defeatedMonster = pq.gameState.monster;
+		pq.gameState.monster = null;
+		model.monster1 = new pq.Monster("small");
+		model.monster2 = new pq.Monster("medium");
+		model.monster3 = new pq.Monster("large");
+		return model;
+	},
+	'<h2>Victory!</h2><p>You defeated {{defeatedMonster.name}} the level {{defeatedMonster.level}} {{defeatedMonster.type}}!</p><h2>Battle Again?</h2><ol><li><p>{{monster1.name}} the level {{monster1.level}} {{monster1.type}} ({{monster1.hp}} HP)</p><p><button id="battle1">Battle!</button></p></li><li><p>{{monster2.name}} the level {{monster2.level}} {{monster2.type}} ({{monster2.hp}} HP)</p><p><button id="battle2">Battle!</button></p></li><li><p>{{monster3.name}} the level {{monster3.level}} {{monster3.type}} ({{monster3.hp}} HP)</p><p><button id="battle3">Battle!</button></p></li></ol><h2>Take a Break</h2><p><button id="rest">Rest</button></p>',
 	null,
 	{
-		"battle1": "battle",
-		"battle2": "battle",
-		"battle3": "battle",
+		"battle1": { "state": "battle", "preswitch": function (thisState, nextState) { pq.gameState.monster = thisState.model.monster1; } },
+		"battle2": { "state": "battle", "preswitch": function (thisState, nextState) { pq.gameState.monster = thisState.model.monster2; } },
+		"battle3": { "state": "battle", "preswitch": function (thisState, nextState) { pq.gameState.monster = thisState.model.monster3; } },
 		"rest": "activity"
 	}
 );
