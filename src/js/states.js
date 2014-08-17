@@ -74,10 +74,21 @@ pq.states.intro = new pq.State(
 );
 pq.states.createHero = new pq.State(
 	null,
-	'<h2>Create Your Hero</h2><p><button id="done">Done</button></p>',
-	null,
+	'<h2>Create Your Hero</h2><p><label for="heroname">Hero Name:</label><input type="text" name="heroname" id="heroname" /></p><p><button id="done">Done</button></p>',
+	function () {
+		var nameField = document.getElementById("heroname");
+		var doneButton = document.getElementById("done");
+
+		doneButton.disabled = true;
+
+		nameField.onkeyup = function (e) {
+			if(nameField.value.length > 0) {
+				doneButton.disabled = false;
+			}
+		};
+	},
 	{
-		"done": "activity"
+		"done": { "state": "activity", "preswitch": function (thisState, nextState) { pq.gameState.hero.name = document.getElementById("heroname").value; } },
 	}
 );
 pq.states.activity = new pq.State(
